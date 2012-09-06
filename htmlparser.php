@@ -19,8 +19,8 @@ class HtmlParser
 
 		libxml_clear_errors();
 
-		$xpath = new DOMXPath($html);
-		return new HtmlNode($html->documentElement, $xpath);
+		$dom_xpath = new DOMXPath($html);
+		return new HtmlNode($html->documentElement, $dom_xpath);
 	}
 
 	public static function from_file($file, $xml = false)
@@ -29,6 +29,8 @@ class HtmlParser
 		return self::from_string($str, $xml);
 	}
 
+	// Converts a given CSS Selector expression to xpath expression.
+	// This function is direct port of firebug's css to xpath convertor.
 	public static function css_to_xpath($rule)
 	{
 		$reg_element = '/^([#.]?)([a-z0-9\\*_-]*)((\|)([a-z0-9\\*_-]*))?/i';
@@ -147,6 +149,9 @@ class HtmlNode
 		if($xpath) $this->dom_xpath = $dom_xpath;
 	}
 
+	// use $node->text for node's text.
+	// use $node->html for node's inner HTML.
+	// use $node->anything for node's attribute.
 	public function __get($name)
 	{
 		if($name == 'text' || $name == 'plaintext')
@@ -159,12 +164,17 @@ class HtmlNode
 			return null;
 	}
 
+	// finds nodes by css selector expression.
+	// returns an array of nodes if $idx is not given, otherwise returns a single node at index $idx.
+	// returns null if node not found or error in selector expression.
+	// $idx can be negative (find from last).
 	public function find($query, $idx = null)
 	{
 		$xpath = HtmlParser::css_to_xpath($query);
 		return $this->xpath($xpath, $idx);
 	}
 
+	// finds nodes by xpath expression.
 	public function xpath($xpath, $idx = null)
 	{
 		$result = $this->dom_xpath->query($xpath, $this->node);
@@ -291,7 +301,12 @@ class HtmlNode
 	public function html() 
 	{
 		$tag = $this->node_name();
-		return preg_replace('@(^<[\s]*' . $tag . '[\s]*>)|(</[\s]*' . $tag . '[\s]*>$)@', '', $this->outer_html());
+		return preg_replace('@(^<' . $tag . '[^>]*>)|(</' . $tag . '>$)@', '', $this->outer_html());
+	}
+
+	public function inner_html()
+	{
+		return $this->html();
 	}
 
 	public function outer_html()
@@ -299,7 +314,7 @@ class HtmlNode
 		$doc = new DOMDocument();
 		$doc->appendChild($doc->importNode($this->node, TRUE));
 		$html = trim($doc->saveHTML());
-		return str_replace('&nbsp;', ' ', str_replace('__$__', '&', $html));
+		return $html;
 	}
 
 	public function node_name()
@@ -307,6 +322,7 @@ class HtmlNode
 		return $this->node->nodeName;
 	}
 
+	// Wrap given DOMNodes in HtmlNode and return an array of them.
 	private static function wrap_nodes($nodes, $dom_xpath = null)
 	{
 		$wrapped = array();
@@ -317,6 +333,7 @@ class HtmlNode
 		return $wrapped;
 	}
 
+	// Wrap a given DOMNode in HtmlNode.
 	private static function wrap_node($node, $dom_xpath = null)
 	{
 		if($node == null) return null;
