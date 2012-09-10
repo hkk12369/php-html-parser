@@ -1,5 +1,10 @@
 <?php
 
+/**
+* Author: Hitesh Kumar, IIT Delhi.
+* License: http://en.wikipedia.org/wiki/WTFPL
+*/
+
 class HtmlParser
 {
 	public static function from_string($str, $xml = false)
