@@ -1,9 +1,7 @@
 PHP HTML Parser
 ===============
 
-A simple and efficient DOMDocument based PHP HTML and XML Parser.  
-Accepts both css selector and xpath queries to search the document.  
-Handles Mal-formed HTML as well.
+A simple and efficient DOMDocument based PHP HTML and XML Parser. It accepts both css selector and xpath queries to search the document and handles malformed HTML as well.
 
 Example:
 ```php
