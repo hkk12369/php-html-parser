@@ -43,12 +43,12 @@ class HtmlParser
 		$reg_attr2 = '/^\[\s*([^~=\s]+)\s*(~?=)\s*"([^"]+)"\s*\]/i';
 		$reg_attr3 = '/^\[\s*([^~=\s]+)\s*(~?=)\s*\'([^\']+)\'\s*\]/i';
 		$reg_attr4 = '/^\[\s*([^~=\s]+)\s*(~?=)\s*([^\]]+)\s*\]/i';
-		$reg_pseudo = '/^:([a-z_-])+/i';
+		$reg_pseudo = '/^:([a-z_-]+)(\([a-z_-]+\))?/i';
 		$reg_combinator = '/^(\s*[>+\s])?/i';
 		$reg_comma = '/^\s*,/i';
 
 		$index = 1;
-		$parts = array("//", "*");
+		$parts = array(".//", "*");
 		$last_rule = null;
 
 		while ($rule && $rule !== $last_rule)
@@ -107,6 +107,18 @@ class HtmlParser
 			preg_match($reg_pseudo, $rule, $m);
 			while ($m)
 			{
+				// Handle Later
+				// if($m[1] && $m[2])
+				// {
+				// 	$m[2] = substr($m[2], 1, -1);
+
+				// 	switch($m[1])
+				// 	{
+				// 		case 'contains':
+				// 			$parts[] = '[contains(translate(normalize-space(string(.)),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),translate("'.$m[2].'","ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"))]';
+				// 	}
+				// }	
+
 				$rule = substr($rule, strlen($m[0]));
 				preg_match($reg_pseudo, $rule, $m);
 			}
@@ -131,9 +143,9 @@ class HtmlParser
 			if ($m)
 			{
 				$parts[] = " | ";
-				$parts[] = "//";
+				$parts[] = ".//";
+				$index = count($parts);
 				$parts[] = "*";
-				$index = count($parts) - 1;
 				$rule = substr($rule, strlen($m[0]));
 			}
 		}
@@ -151,7 +163,7 @@ class HtmlNode
 	public function __construct($node, $dom_xpath = null)
 	{
 		$this->node = $node;
-		if($xpath) $this->dom_xpath = $dom_xpath;
+		if($dom_xpath) $this->dom_xpath = $dom_xpath;
 	}
 
 	// use $node->text for node's text.
