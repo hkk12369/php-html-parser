@@ -67,7 +67,7 @@ class HtmlParser
 				if (!$m[1])
 				{
 					// XXXjoe Namespace ignored for now
-					if ($m[5])
+					if (isset($m[5]))
 						$parts[$index] = $m[5];
 					else
 						$parts[$index] = $m[2];
